@@ -1,4 +1,5 @@
 import 'package:ayurveda/core/constants/app_colors.dart';
+import 'package:ayurveda/presentation/register_patient/register_patient.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/patient_provider.dart';
@@ -139,7 +140,7 @@ class HomeScreen extends StatelessWidget {
                               'Date',
                               style: TextStyle(
                                 fontSize: 14,
-                                color: Colors.black87,
+                                color: AppColors.black,
                               ),
                             ),
                             const SizedBox(width: 30),
@@ -199,7 +200,9 @@ class HomeScreen extends StatelessWidget {
                     width: double.infinity,
                     height: 48,
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.of(context).push(MaterialPageRoute(builder: (context)=> RegisterScreen()));
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primaryGreen,
                         shape: RoundedRectangleBorder(

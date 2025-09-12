@@ -7,7 +7,7 @@ class PatientService {
 
   Future<List<dynamic>> fetchPatients() async {
     final token = await LoginService().getToken();
-    // print(token);
+    print(token);
     final response = await http.get(
       Uri.parse("$baseUrl/PatientList"),
       headers: {
