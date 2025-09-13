@@ -50,33 +50,27 @@ class RegisterPatientService {
   }
 
   // Register Patient
-Future<bool> registerPatient(PatientRegister patient) async {
-  try {
-    final token = await LoginService().getToken();
-    if (token == null) throw Exception('Token not found');
 
-    final response = await http.post(
-      Uri.parse('$baseUrl/PatientUpdate'),
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer $token",
-      },
-      body: json.encode(patient.toJson()),
-    );
+Future<Map<String, dynamic>>  registerPatient(PatientRegister patient) async {
+  final token = await LoginService().getToken();
+
+  final request = patient.toMultipartRequest(token ?? '');
+
+  try {
+    final response = await request.send();
+
+    // Read response body
+    final responseBody = await response.stream.bytesToString();
 
     if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      if (data['status'] == true) return true;
-      else {
-        throw Exception(data['message'] ?? 'Registration failed');
-      }
+      print('Success: $responseBody');
+      return jsonDecode(responseBody);
     } else {
-      throw Exception(
-          'Failed to register patient. Status code: ${response.statusCode}');
+      print('Error $response.statusCode: $responseBody');
+      throw Exception('Failed to register patient: ${response.statusCode}');
     }
   } catch (e) {
-    
-    print('registerPatient error: $e');
+    print('Exception: $e');
     rethrow;
   }
 }

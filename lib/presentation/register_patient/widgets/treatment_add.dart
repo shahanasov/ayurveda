@@ -67,11 +67,7 @@ class _TreatmentWidgetState extends State<TreatmentWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          "Treatments",
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-        ),
-        const SizedBox(height: 8),
+        
         Wrap(
           spacing: 8,
           runSpacing: 8,

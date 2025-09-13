@@ -10,5 +10,5 @@ class RegisterRepository {
 
   Future<List<Branch>> fetchBranches() => _service.fetchBranches();
   Future<List<Treatment>> fetchTreatments() => _service.fetchTreatments();
-  Future<bool> registerPatient(PatientRegister request) => _service.registerPatient(request);
+  Future<Map<String, dynamic>>  registerPatient(PatientRegister request) => _service.registerPatient(request);
 }

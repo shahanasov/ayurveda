@@ -120,14 +120,12 @@ class RegisterPatientProvider with ChangeNotifier {
   Future<void> loadTreatments() async {
     isTreatmentLoading = true;
     notifyListeners();
-
     try {
       treatments = await service.fetchTreatments();
     } catch (e) {
       debugPrint("Error fetching treatments: $e");
-      treatments = []; // fallback
+      treatments = [];
     }
-
     isTreatmentLoading = false;
     notifyListeners();
   }
@@ -146,45 +144,82 @@ class RegisterPatientProvider with ChangeNotifier {
     }
   }
 
-  // ------------------- Register patient -------------------
-  Future<PatientRegister> savePatientData() async {
-  if (selectedBranch == null || selectedLocation == null) {
-    throw Exception("Branch or location not selected");
+  // ------------------- Register patient with API -------------------
+  Future<bool> savePatientData() async {
+    // Validate required fields
+    if (selectedBranch == null ||
+        selectedLocation == null ||
+        selectedTreatments.isEmpty) {
+      isLoading = false;
+      notifyListeners();
+      return false;
+    }
+
+    isLoading = true;
+    notifyListeners();
+
+    try {
+      final patient = _buildPatientRegister();
+
+      // Call the API
+      final response = await service.registerPatient(patient);
+
+      bool isSuccess = false;
+
+      isSuccess =
+          response['success'] == true ||
+          (response['message'] != null &&
+              (response['message'] == 'Patient registered successfully' ||
+                  response['message'] == 'Success'));
+
+      isLoading = false;
+      notifyListeners();
+
+      return isSuccess;
+    } catch (e) {
+      debugPrint("Error saving patient: $e");
+      isLoading = false;
+      notifyListeners();
+      return false;
+    }
   }
 
-  // Format date and time for date_nd_time key
-  String dateText = dateController.text.isNotEmpty
-      ? dateController.text
-      : "${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}";
-  String timeText = '${selectedHour ?? '00'}:${selectedMinute ?? '00'} ${DateTime.now().hour >= 12 ? 'PM' : 'AM'}';
-  String dateAndTime = '$dateText-$timeText';
+  PatientRegister _buildPatientRegister() {
+    // Build date & time string
+    String dateText = dateController.text.isNotEmpty
+        ? dateController.text
+        : "${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}";
+    String timeText =
+        '${selectedHour ?? '00'}:${selectedMinute ?? '00'} ${DateTime.now().hour >= 12 ? 'PM' : 'AM'}';
+    String dateAndTime = '$dateText-$timeText';
 
-  final patient = PatientRegister(
-    name: nameController.text,
-    executive: selectedBranch!.name,
-    payment: paymentOption,
-    phone: whatsappController.text,
-    address: addressController.text,
-    totalAmount: double.tryParse(totalAmountController.text) ?? 0,
-    discountAmount: double.tryParse(discountAmountController.text) ?? 0,
-    advanceAmount: double.tryParse(advanceAmountController.text) ?? 0,
-    balanceAmount: double.tryParse(balanceAmountController.text) ?? 0,
-    dateAndTime: dateAndTime,
-    id: '', // always empty
-    male: selectedTreatments.map((t) => t.id).take(maleCount).join(","), // male treatments
-    female: selectedTreatments
-        .map((t) => t.id)
-        .skip(maleCount)
-        .take(femaleCount)
-        .join(","), // female treatments
-    branch: selectedBranch!.id.toString(),
-    treatments: selectedTreatments.map((t) => t.id).join(","), // all treatments
-  );
-
-  return patient;
-}
-
-
+    return PatientRegister(
+      name: nameController.text.trim(),
+      executive: '', // Send empty string if not selected
+      payment: paymentOption,
+      phone: whatsappController.text.trim(),
+      address: addressController.text.trim(),
+      totalAmount: double.tryParse(totalAmountController.text) ?? 0,
+      discountAmount: double.tryParse(discountAmountController.text) ?? 0,
+      advanceAmount: double.tryParse(advanceAmountController.text) ?? 0,
+      balanceAmount: double.tryParse(balanceAmountController.text) ?? 0,
+      dateNdTime: dateAndTime,
+      id: '', // Always include id, empty for new patient
+      male: selectedTreatments
+          .map((t) => t.id)
+          .take(maleCount)
+          .join(","), // Comma-separated string
+      female: selectedTreatments
+          .map((t) => t.id)
+          .skip(maleCount)
+          .take(femaleCount)
+          .join(","), // Comma-separated string
+      branch: selectedBranch?.id.toString() ?? '', // Always send string
+      treatments: selectedTreatments
+          .map((t) => t.id)
+          .join(","), // Comma-separated
+    );
+  }
 
   // ------------------- Add/Remove treatment -------------------
   void addTreatment(Treatment treatment) {
