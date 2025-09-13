@@ -203,6 +203,18 @@ class RegisterScreen extends StatelessWidget {
                       return;
                     }
 
+                    // Save patient data after PDF is generated
+                    final success = await provider.savePatientData();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          success
+                              ? "Patient Registered & PDF Generated"
+                              : "Registration Failed",
+                        ),
+                      ),
+                    );
+
                     // Calculate balance if needed (optional, but good practice)
                     double totalAmount =
                         provider.totalAmountController.text.trim().isEmpty
@@ -269,17 +281,7 @@ class RegisterScreen extends StatelessWidget {
                       balance: balance,
                     );
 
-                    // Save patient data after PDF is generated
-                    final success = await provider.savePatientData();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          success
-                              ? "Patient Registered & PDF Generated"
-                              : "Registration Failed",
-                        ),
-                      ),
-                    );
+                    
                     Navigator.pushAndRemoveUntil(
                       context,
                       MaterialPageRoute(

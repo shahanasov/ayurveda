@@ -163,7 +163,8 @@ class RegisterPatientProvider with ChangeNotifier {
 
       // Call the API
       final response = await service.registerPatient(patient);
-
+      
+print("666");
       bool isSuccess = false;
 
       isSuccess =
@@ -186,12 +187,13 @@ class RegisterPatientProvider with ChangeNotifier {
 
   PatientRegister _buildPatientRegister() {
     // Build date & time string
-    String dateText = dateController.text.isNotEmpty
-        ? dateController.text
-        : "${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}";
-    String timeText =
-        '${selectedHour ?? '00'}:${selectedMinute ?? '00'} ${DateTime.now().hour >= 12 ? 'PM' : 'AM'}';
-    String dateAndTime = '$dateText-$timeText';
+   // Format date as yyyy-MM-dd
+String formattedDate =
+    "${DateTime.now().year}-${DateTime.now().month.toString().padLeft(2, '0')}-${DateTime.now().day.toString().padLeft(2, '0')}";
+
+// Format time as HH:mm:ss (24-hour)
+String formattedTime =
+    "${(selectedHour ?? 0).toString().padLeft(2, '0')}:${(selectedMinute ?? 0).toString().padLeft(2, '0')}:00";
 
     return PatientRegister(
       name: nameController.text.trim(),
@@ -203,7 +205,7 @@ class RegisterPatientProvider with ChangeNotifier {
       discountAmount: double.tryParse(discountAmountController.text) ?? 0,
       advanceAmount: double.tryParse(advanceAmountController.text) ?? 0,
       balanceAmount: double.tryParse(balanceAmountController.text) ?? 0,
-      dateNdTime: dateAndTime,
+      dateNdTime: "$formattedDate $formattedTime",
       id: '', // Always include id, empty for new patient
       male: selectedTreatments
           .map((t) => t.id)

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'package:ayurveda/data/models/branch_model.dart';
 import 'package:ayurveda/data/models/register_model.dart';
 import 'package:ayurveda/data/models/treatment_model.dart';
@@ -58,9 +59,10 @@ Future<Map<String, dynamic>>  registerPatient(PatientRegister patient) async {
 
   try {
     final response = await request.send();
-
+log(response.statusCode.toString());
     // Read response body
     final responseBody = await response.stream.bytesToString();
+    
 
     if (response.statusCode == 200) {
       print('Success: $responseBody');
